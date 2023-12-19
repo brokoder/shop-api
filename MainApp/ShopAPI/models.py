@@ -1,5 +1,6 @@
 from django.db import models
 
+
 class Supplier(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=100)
@@ -7,6 +8,7 @@ class Supplier(models.Model):
 
     def __str__(self):
         return self.name
+
 
 class PurchaseOrder(models.Model):
     id = models.AutoField(primary_key=True)
@@ -29,6 +31,7 @@ class PurchaseOrder(models.Model):
     def __str__(self):
         return f"Order {self.order_number} - {self.supplier}"
 
+
 class LineItem(models.Model):
     id = models.AutoField(primary_key=True)
     item_name = models.CharField(max_length=100)
@@ -37,7 +40,9 @@ class LineItem(models.Model):
     tax_name = models.CharField(max_length=100)
     tax_amount = models.DecimalField(max_digits=10, decimal_places=2)
     line_total = models.DecimalField(max_digits=10, decimal_places=2)
-    purchase_order = models.ForeignKey(PurchaseOrder, related_name='line_items', on_delete=models.CASCADE)
+    purchase_order = models.ForeignKey(
+        PurchaseOrder, related_name="line_items", on_delete=models.CASCADE
+    )
 
     def __str__(self):
         return f"{self.item_name} - Order {self.purchase_order.order_number}"

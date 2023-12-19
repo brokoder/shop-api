@@ -1,9 +1,29 @@
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from .serializers import PurchaseOrderMutateSerializer, PurchaseOrderSerializer, SupplierSerializer
+from .serializers import (
+    PurchaseOrderMutateSerializer,
+    PurchaseOrderSerializer,
+    SupplierSerializer,
+)
 from .models import PurchaseOrder
-from drf_spectacular.utils  import extend_schema
+from drf_spectacular.utils import extend_schema
+from django.core.exceptions import ObjectDoesNotExist
+
+
+def fetch_resource(model_class):
+    def wrapper(func):
+        def inner(*args, **kwargs):
+            try:
+                kwargs["instance"] = model_class.objects.get(id=kwargs.pop("record_id"))
+            except ObjectDoesNotExist:
+                return Response("Entry not found", status=status.HTTP_404_NOT_FOUND)
+            return func(*args, **kwargs)
+
+        return inner
+
+    return wrapper
+
 
 class PurchaseOrderView(APIView):
     @extend_schema(request=PurchaseOrderMutateSerializer)
@@ -16,9 +36,10 @@ class PurchaseOrderView(APIView):
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    @extend_schema(responses=PurchaseOrderSerializer)
     def get(self, request, format=None):
-        supplier_name = request.query_params.get('supplier_name')
-        item_name = request.query_params.get('item_name')
+        supplier_name = request.query_params.get("supplier_name")
+        item_name = request.query_params.get("item_name")
 
         queryset = PurchaseOrder.objects.all()
 
@@ -34,28 +55,26 @@ class PurchaseOrderView(APIView):
 
 
 class PurchaseOrderIDView(APIView):
-
     @extend_schema(responses=PurchaseOrderSerializer)
-    def get(self, request, format=None, record_id= None):
-        try:
-            instance = PurchaseOrder.objects.get(id=record_id)
-        except PurchaseOrder.DoesNotExist:
-            return Response("Entry not found", status=status.HTTP_404_NOT_FOUND)
+    @fetch_resource(PurchaseOrder)
+    def get(self, request, instance=None):
         serializer = PurchaseOrderSerializer(instance)
         return Response(serializer.data)
 
     @extend_schema(request=PurchaseOrderMutateSerializer)
-    def put(self, request,record_id,*args, **kwargs):
-        instance = PurchaseOrder.objects.get(id=record_id)
-        serializer = PurchaseOrderMutateSerializer(instance,data=request.data, partial=True)
+    @fetch_resource(PurchaseOrder)
+    def put(self, request, instance, *args, **kwargs):
+        serializer = PurchaseOrderMutateSerializer(
+            instance, data=request.data, partial=True
+        )
         if serializer.is_valid():
             response_data = serializer.save()
             return Response(response_data, status=status.HTTP_201_CREATED)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def delete(self, request,record_id,*args, **kwargs):
-        instance = PurchaseOrder.objects.get(id=record_id)
+    @fetch_resource(PurchaseOrder)
+    def delete(self, request, instance, *args, **kwargs):
         instance.line_items.all().delete()
         instance.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
