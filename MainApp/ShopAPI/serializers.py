@@ -61,13 +61,11 @@ class PurchaseOrderMutateSerializer(serializers.ModelSerializer):
             _total_tax += int(line_item_data["quantity"]) * float(
                 line_item_data["tax_amount"]
             )
-            line_item_data["line_total"] = line_item_data["quantity"] * (
-                line_item_data["price_without_tax"] + line_item_data["tax_amount"]
-            )
             line_item = LineItem.objects.create(
                 purchase_order=purchase_order, **line_item_data
             )
             line_item_data["id"] = line_item.id
+            line_item_data["line_total"] = line_item.line_total
         purchase_order.total_amount = _total_amount
         purchase_order.total_quantity = _total_quantity
         purchase_order.total_tax = _total_tax
@@ -93,9 +91,6 @@ class PurchaseOrderMutateSerializer(serializers.ModelSerializer):
         _total_tax = 0
         for line_item_data in line_items_data:
             line_item_id = line_item_data.get("id")
-            line_item_data["line_total"] = line_item_data["quantity"] * (
-                line_item_data["price_without_tax"] + line_item_data["tax_amount"]
-            )
             if line_item_id:
                 # Update existing line items
                 if line_item_id in existing_line_item_ids:
@@ -113,6 +108,7 @@ class PurchaseOrderMutateSerializer(serializers.ModelSerializer):
                     for attr, value in line_item_data.items():
                         setattr(line_item, attr, value)
                     line_item.save()
+                    line_item_data["line_total"] = line_item.line_total
                     existing_line_item_ids.remove(line_item_id)
                 else:
                     # If an ID is given but not found in the current line items, skip
@@ -130,11 +126,12 @@ class PurchaseOrderMutateSerializer(serializers.ModelSerializer):
                 line_item = LineItem.objects.create(
                     purchase_order=purchase_order, **line_item_data
                 )
+                line_item_data["line_total"] = line_item.line_total
                 line_item_data["id"] = line_item.id
         # Delete line items that were not updated or created
         LineItem.objects.filter(id__in=existing_line_item_ids).delete()
         response_data = purchase_order_formatter(
-            purchase_order, validated_data["supplier"], line_items_data
+            purchase_order, supplier_data, line_items_data
         )
         purchase_order.total_amount = _total_amount
         purchase_order.total_quantity = _total_quantity

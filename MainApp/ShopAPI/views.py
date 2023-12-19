@@ -4,7 +4,6 @@ from rest_framework.views import APIView
 from .serializers import (
     PurchaseOrderMutateSerializer,
     PurchaseOrderSerializer,
-    SupplierSerializer,
 )
 from .models import PurchaseOrder
 from drf_spectacular.utils import extend_schema
@@ -68,7 +67,10 @@ class PurchaseOrderIDView(APIView):
             instance, data=request.data, partial=True
         )
         if serializer.is_valid():
-            response_data = serializer.save()
+            try:
+                response_data = serializer.save()
+            except KeyError:
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
             return Response(response_data, status=status.HTTP_201_CREATED)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

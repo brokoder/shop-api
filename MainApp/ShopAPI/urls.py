@@ -6,6 +6,6 @@ urlpatterns = [
     path(
         "purchase/orders/<int:record_id>/",
         PurchaseOrderIDView.as_view(),
-        name="purchase-order",
+        name="purchase-order-id",
     ),
 ]

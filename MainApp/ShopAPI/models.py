@@ -43,6 +43,9 @@ class LineItem(models.Model):
     purchase_order = models.ForeignKey(
         PurchaseOrder, related_name="line_items", on_delete=models.CASCADE
     )
+    def save(self, *args, **kwargs):
+        self.line_total = self.quantity * (self.price_without_tax + self.tax_amount)
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.item_name} - Order {self.purchase_order.order_number}"
