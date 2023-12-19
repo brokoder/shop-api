@@ -1,0 +1,7 @@
+env/
+*.xml
+*.iml
+*.sqlite3
+*.pyc
+migrations/
+.idea/
