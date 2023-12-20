@@ -91,7 +91,7 @@ class PurchaseOrderIDViewTestCase(TestCase):
         self.line_item = LineItem.objects.create(purchase_order=self.purchase_order, item_name='Test Item', quantity=1, price_without_tax=10.00, tax_name='GST 5%', tax_amount=0.50,line_total=10.50)
 
     def test_get_purchase_order(self):
-        url = reverse('purchase-order-id', kwargs={'record_id': self.purchase_order.id})
+        url = reverse('purchase-order-id', kwargs={'id': self.purchase_order.id})
         response = self.client.get(url)
         
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -100,7 +100,7 @@ class PurchaseOrderIDViewTestCase(TestCase):
 
     def test_get_nonexistent_purchase_order(self):
         non_existent_id = 9999
-        url = reverse('purchase-order-id', kwargs={'record_id': non_existent_id})
+        url = reverse('purchase-order-id', kwargs={'id': non_existent_id})
         response = self.client.get(url)
         
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
@@ -131,7 +131,7 @@ class PurchaseOrderIDViewTestCase(TestCase):
                 }
             ]
         }
-        url = reverse('purchase-order-id', kwargs={'record_id': self.purchase_order.id})
+        url = reverse('purchase-order-id', kwargs={'id': self.purchase_order.id})
         response = self.client.put(url, valid_payload, format='json')
         
         self.assertEqual(response.status_code, status.HTTP_201_CREATED )
@@ -156,7 +156,7 @@ class PurchaseOrderIDViewTestCase(TestCase):
             }
             # Missing line_items
         }
-        url = reverse('purchase-order-id', kwargs={'record_id': self.purchase_order.id})
+        url = reverse('purchase-order-id', kwargs={'id': self.purchase_order.id})
         response = self.client.put(url, invalid_payload, format='json')
         
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -165,7 +165,7 @@ class PurchaseOrderIDViewTestCase(TestCase):
 
 
     def test_delete_purchase_order_and_line_items(self):
-        url = reverse('purchase-order-id', kwargs={'record_id': self.purchase_order.id})
+        url = reverse('purchase-order-id', kwargs={'id': self.purchase_order.id})
         response = self.client.delete(url)
 
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
@@ -174,8 +174,7 @@ class PurchaseOrderIDViewTestCase(TestCase):
 
     def test_delete_nonexistent_purchase_order(self):
         non_existent_id = 9999
-        url = reverse('purchase-order-id', kwargs={'record_id': non_existent_id})
+        url = reverse('purchase-order-id', kwargs={'id': non_existent_id})
         response = self.client.delete(url)
 
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-    

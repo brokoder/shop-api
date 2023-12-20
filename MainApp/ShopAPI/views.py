@@ -14,7 +14,7 @@ def fetch_resource(model_class):
     def wrapper(func):
         def inner(*args, **kwargs):
             try:
-                kwargs["instance"] = model_class.objects.get(id=kwargs.pop("record_id"))
+                kwargs["instance"] = model_class.objects.get(id=kwargs.pop("id"))
             except ObjectDoesNotExist:
                 return Response("Entry not found", status=status.HTTP_404_NOT_FOUND)
             return func(*args, **kwargs)
@@ -62,7 +62,7 @@ class PurchaseOrderIDView(APIView):
 
     @extend_schema(request=PurchaseOrderMutateSerializer)
     @fetch_resource(PurchaseOrder)
-    def put(self, request, instance, *args, **kwargs):
+    def put(self, request, instance):
         serializer = PurchaseOrderMutateSerializer(
             instance, data=request.data, partial=True
         )
@@ -76,7 +76,7 @@ class PurchaseOrderIDView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     @fetch_resource(PurchaseOrder)
-    def delete(self, request, instance, *args, **kwargs):
+    def delete(self, request, instance):
         instance.line_items.all().delete()
         instance.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
