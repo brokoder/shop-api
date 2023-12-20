@@ -12,8 +12,8 @@ This repository contains a Django-based CRUD API for managing purchase orders.
 1. Clone the repository:
 
     ```bash
-    git clone https://github.com/your_username/django-purchase-order-api.git
-    cd django-purchase-order-api
+    git clone https://github.com/brokoder/shop-api.git
+    cd shop-api
     ```
 
 2. Create and activate a virtual environment:
@@ -27,6 +27,12 @@ This repository contains a Django-based CRUD API for managing purchase orders.
 
     ```bash
     pip install -r requirements.txt
+    ```
+
+3. Go to App Repo:
+
+    ```bash
+    cd MainApp
     ```
 
 5. Apply migrations:
@@ -45,6 +51,7 @@ To start the development server, run the following command:
     ```
 
 By default, the server will run at http://127.0.0.1:8000/
+For Viewing in Swagger got to http://127.0.0.1:8000/docs
 
 ## Running Tests
 To run tests, use the following command
