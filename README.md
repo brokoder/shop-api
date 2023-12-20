@@ -51,7 +51,6 @@ To start the development server, run the following command:
     ```
 
 By default, the server will run at http://127.0.0.1:8000/
-For Viewing in Swagger got to http://127.0.0.1:8000/docs
 
 ## Running Tests
 To run tests, use the following command
